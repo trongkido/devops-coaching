@@ -7,19 +7,18 @@
    - [Typical CI/CD Pipeline](#typical-cicd-pipeline)  
 
 2. [🐙 Git Basics](#-git-basics)
-   - [How to Install Git] (#how-to-install-git) 
+   - [How to Install Git](#how-to-install-git) 
    - [Common Commands](#common-commands)
 
 3. [🌿 Git Workflows](#-git-workflows)  
-   - [Feature Branch Workflow](#1-feature-branch-workflow)  
-   - [Gitflow Workflow](#2-gitflow-workflow)  
-   - [Forking Workflow](#3-forking-workflow)  
+   - [Gitflow Workflow](#gitflow-workflow)  
+   - [Trunk-Based Development](#trunk-based-development)  
 
 4. [🔄 GitOps](#-gitops)  
    - [What is GitOps?](#what-is-gitops)  
    - [Principles of GitOps](#principles-of-gitops)  
    - [GitOps Workflow](#gitops-workflow)  
-   - [Tools](#tools)  
+   - [Tools](#tools)
 
 5. [✅ Summary](#-summary)  
 
@@ -179,17 +178,17 @@ While challenging, the rewards of CD — **speed, stability, and innovation** �
 
 ## 2. Git Basics
 ### How to install Git
-### 📌 Linux (Debian/Ubuntu)
+#### 📌 Linux (Debian/Ubuntu)
 sudo apt update
 sudo apt install git -y
 git --version
-### 📌 Linux (RHEL/CentOS/Rocky)
+#### 📌 Linux (RHEL/CentOS/Rocky)
 sudo dnf install git -y   # or: sudo yum install git -y
 git --version
-### 📌 macOS
+#### 📌 macOS
 brew install git
 git --version
-### 📌 Windows
+#### 📌 Windows
 1. Download Git for Windows: https://git-scm.com/download/win
 2. Run the installer with default settings.
 3. Open Git Bash or Command Prompt and check:
