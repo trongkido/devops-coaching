@@ -297,6 +297,7 @@ Trunk-Based Development (TBD) is a simpler model that focuses on frequent and ra
 ---
 
 ## 📚 References
+- [Tony TechLab Course](https://tonytechlab.com/courses/mastering-ci-cd-from-docker-to-k8s/lessons/continuous-integration-ci-muc-dich-loi-ich/)
 - [Atlassian Git Tutorials](https://www.atlassian.com/git/tutorials)
 - [Gitflow Workflow](https://nvie.com/posts/a-successful-git-branching-model/)
 - [Argo CD Documentation](https://argo-cd.readthedocs.io/)
