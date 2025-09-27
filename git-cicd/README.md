@@ -14,15 +14,24 @@
    - [Gitflow Workflow](#gitflow-workflow)  
    - [Trunk-Based Development](#trunk-based-development)  
 
-4. [🔄 GitOps](#-gitops)  
+4. [🚀 Git Hands-On Lab ](#-git-hands-on-lab)
+   - [Initialize a Git Repository](#initialize-a-git-repository)
+   - [Create and Commit Your First File](#create-and-commit-your-first-file)
+   - [Make Changes and Commit Again](#make-changes-and-commit-again)
+   - [View Commit History](#view-commit-history)
+   - [Create and Switch Branches](#create-and-switch-branches)
+   - [Merge Branches](#merge-branches)
+   - [How to fix a conflix](#how-to-fix-a-confix)
+
+5. [🔄 GitOps](#-gitops)  
    - [What is GitOps?](#what-is-gitops)  
    - [Principles of GitOps](#principles-of-gitops)  
    - [GitOps Workflow](#gitops-workflow)  
    - [Tools](#tools)
 
-5. [✅ Summary](#-summary)  
+6. [✅ Summary](#-summary)  
 
-6. [📚 References](#-references)  
+7. [📚 References](#-references)  
 
 ---
 
@@ -40,7 +49,7 @@
 - **Key Point**: Deploying to the real Production environment still requires a **manual decision** (a human approval click).
 ##### Anatomy of a Continuous Delivery Pipeline
 A typical CD pipeline is a sequence of automated **“quality gates”**, where each gate must be passed before moving on to the next.
-![Alt text](../images/cicd_pipeline.png)
+![Alt text](./images/cicd_pipeline.png)
 
 ###### **Phase 1: Continuous Integration (CI Phase)**  
 This is the foundation of CD. Every time a developer commits code, the pipeline automatically:  
@@ -215,7 +224,7 @@ git config --global user.email "youremail@example.com"
 Git workflows define how teams collaborate, manage branches, and deliver code in a consistent and reliable way. Below are three of the most common workflows, with details on their structure, advantages, disadvantages, and typical usage.
 
 ### **Gitflow Workflow**
-![Alt text](../images/gitflow.png)
+![Alt text](./images/gitflow.png)
 
 - **Branches:**
   - `main` → production-ready code, only stable releases are merged into this branch.
@@ -234,7 +243,7 @@ Git workflows define how teams collaborate, manage branches, and deliver code in
 
 ### **Trunk-Based Development**
 Trunk-Based Development (TBD) is a simpler model that focuses on frequent and rapid code integration. All developers work on a single branch, typically called the trunk (or main).
-![Alt text](../images/trunkbased.png)
+![Alt text](./images/trunkbased.png)
 #### Process
 - All developers commit directly to the main branch or use very short-lived feature branches (lasting only a few hours).
 - Small and frequent changes are merged into the main branch.
@@ -261,7 +270,162 @@ Trunk-Based Development (TBD) is a simpler model that focuses on frequent and ra
 
 ---
 
-## 4. GitOps
+## 4. Git Hands-On Lab
+This small, hands-on lab for Git focuses on the fundamental commands and workflow. It guides you through creating a local repository, making changes, committing them, and exploring basic branching.
+
+### Initialize a Git Repository
+Create a new directory for your project:
+```bash
+mkdir git_lab_project
+cd git_lab_project
+```
+Initialize Git in this directory.
+```bash
+git init
+```
+Clone a remote repo in this directory
+```bash
+git clone <reporitory_url>
+```
+
+### Create and Commit Your First File
+Create a simple text file, e.g., README.md:
+```bash
+echo "# My Git Lab Project" > README.md
+```
+Check the status of your repository.
+```bash
+git status
+```
+This will show README.md as untracked. Stage the file for commit.
+```bash
+git add README.md
+```
+You can you this command to add all the untracked files.
+```bash
+git add .
+```
+Commit the staged file.
+```bash
+git commit -m "Initial commit"
+```
+
+### Make Changes and Commit Again
+Modify README.md.
+```bash
+echo "This is a hands-on lab for learning Git basics." >> README.md
+```
+Check the status and commit the changes:
+```bash
+git status
+git add README.md
+git commit -m "Added description to README"
+```
+
+### View Commit History
+Examine the commit history.
+```bash
+git log
+```
+This command will show compact, visual representation of your commit history
+```bash
+git log --oneline --graph
+```
+
+### Create and Switch Branches
+Create a new branch named feature-a:
+```bash
+git branch feature-a
+```
+Switch to the feature-a branch.
+```bash
+git checkout feature-a
+```
+Please note that this command will create a branch and then switch to this new branch
+```bash
+git checkout -b feature-a
+```
+Create a new file in feature-a:
+```bash
+echo "Content for feature A" > feature_a.txt
+git add feature_a.txt
+git commit -m "Added feature A file"
+```
+
+### Merge Branches
+Switch back to the main branch.
+```bash
+git checkout main
+```
+Merge feature-a into main.
+```bash
+git merge feature-a
+```
+Verify the merge by checking the contents of feature_a.txt in main.
+
+### How to fix a conflix
+This guide outlines the steps to handle a situation where a Git commit is conflicted during a push to a remote repository.
+
+#### Step 1: Save Your Changes
+To ensure your local changes are safe:
+
+```bash
+git status
+```
+
+If you see uncommitted local changes, commit them:
+
+```bash
+git add .
+git commit -m "my fixes"
+```
+
+#### Step 2: Pull Remote with Rebase (Preferred)
+This fetches remote changes and applies your commits on top:
+
+```bash
+git pull --rebase origin feature/F-A
+```
+
+#### Step 3: Resolve Conflicts
+If conflicts occur, Git will pause the rebase. Open the conflicted file, which will contain markers like:
+
+```text
+<<<<<<< HEAD
+your changes
+=======
+remote changes
+>>>>>>> origin/feature/F-A
+```
+
+Manually edit the file to merge both your changes and the remote changes (or choose one). After resolving:
+
+```bash
+git add <file>
+git rebase --continue
+```
+
+Repeat this process for each conflicted file until the rebase is complete.
+
+#### Step 4: Push Again
+Once the rebase is finished:
+
+```bash
+git push origin feature/F-A
+```
+
+If Git refuses the push because the history was rewritten, use:
+
+```bash
+git push --force-with-lease origin feature/F-A
+```
+
+### Conclusion
+This lab provides a foundational understanding of Git's core functionalities, enabling you to manage changes and collaborate on projects effectively.
+
+---
+
+## 5. GitOps
 
 ### What is GitOps?
 - GitOps is **using Git as the single source of truth for infrastructure and application deployments**.
@@ -288,7 +452,7 @@ Trunk-Based Development (TBD) is a simpler model that focuses on frequent and ra
 
 ---
 
-## ✅ Summary
+## 6. Summary
 - **CI/CD** automates integration, testing, and delivery.
 - **Git** provides version control for source code and infrastructure.
 - **Git Workflows** (Feature Branch, Gitflow, Forking) standardize collaboration.
@@ -296,7 +460,7 @@ Trunk-Based Development (TBD) is a simpler model that focuses on frequent and ra
 
 ---
 
-## 📚 References
+## 7. References
 - [Tony TechLab Course](https://tonytechlab.com/courses/mastering-ci-cd-from-docker-to-k8s/lessons/continuous-integration-ci-muc-dich-loi-ich/)
 - [Atlassian Git Tutorials](https://www.atlassian.com/git/tutorials)
 - [Gitflow Workflow](https://nvie.com/posts/a-successful-git-branching-model/)
