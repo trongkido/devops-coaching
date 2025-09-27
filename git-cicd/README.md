@@ -420,6 +420,114 @@ If Git refuses the push because the history was rewritten, use:
 git push --force-with-lease origin feature/F-A
 ```
 
+### Creating a Git Conflict Lab
+This section provides a hands-on lab to create and resolve a Git conflict for practice.
+
+#### **Initialize a new repository**:
+
+```bash
+mkdir git-conflict-lab
+cd git-conflict-lab
+git init
+```
+
+#### **Create a file and make the first commit**:
+
+```bash
+echo "Line 1: Hello Git" > demo.txt
+echo "Line 2: Original Content" >> demo.txt
+git add demo.txt
+git commit -m "Initial commit with demo.txt"
+```
+
+Now `demo.txt` looks like:
+
+```text
+Line 1: Hello Git
+Line 2: Original Content
+```
+
+#### **Create a new branch**:
+
+```bash
+git checkout -b branch-A
+```
+
+Edit the file:
+
+```bash
+echo "Line 2: Change from Branch A" > demo.txt
+```
+
+Commit the change:
+
+```bash
+git add demo.txt
+git commit -m "Branch A modifies line 2"
+```
+
+#### **Switch back to main and create another branch**:
+
+```bash
+git checkout main
+git checkout -b branch-B
+```
+
+Edit the same line differently:
+
+```bash
+echo "Line 2: Change from Branch B" > demo.txt
+```
+
+Commit the change:
+
+```bash
+git add demo.txt
+git commit -m "Branch B modifies line 2"
+```
+
+#### **Merge branches to cause conflict**:
+
+Now you have two branches (`branch-A` and `branch-B`) that both changed line 2 differently.
+
+Try merging them:
+
+```bash
+git checkout branch-A
+git merge branch-B
+```
+
+#### **Observe the conflict**:
+
+Git will indicate:
+
+```text
+CONFLICT (content): Merge conflict in demo.txt
+```
+
+And `demo.txt` will look like this:
+
+```text
+Line 1: Hello Git
+<<<<<<< HEAD
+Line 2: Change from Branch A
+=======
+Line 2: Change from Branch B
+>>>>>>> branch-B
+```
+
+✅ **You just created a conflict!**
+
+Now you can practice resolving it manually:
+
+- Edit the file to the version you want.
+- Stage and commit:
+
+```bash
+git add demo.txt
+git commit -m "Resolve conflict between branch A and B"
+```
+
 ### Conclusion
 This lab provides a foundational understanding of Git's core functionalities, enabling you to manage changes and collaborate on projects effectively.
 
