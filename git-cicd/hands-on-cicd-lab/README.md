@@ -39,7 +39,7 @@ In **GitLab**, a **Group** is like a container (or folder) that holds related pr
 Think of it as an **organization unit** to manage multiple repositories together.
 
 ###### 🔹 Key Points about Groups in GitLab
-####### 1. Projects Organization
+1. Projects Organization
 - Instead of having many unrelated repositories, you can group them.  
 - Example:
 devops-tools/ansible-playbooks
@@ -48,7 +48,7 @@ devops-tools/terraform-modules
 
 Here, `devops-tools` is the **group**, and each repo under it is a **project**.
 
-####### 2. Access Control & Permissions
+2. Access Control & Permissions
 - Add users to a group with roles:
 - **Owner**
 - **Maintainer**
@@ -58,7 +58,7 @@ Here, `devops-tools` is the **group**, and each repo under it is a **project**.
 - All projects inside inherit those permissions.
 - Makes user management easier compared to setting permissions per project.
 
-####### 3. Subgroups
+3. Subgroups
 - Groups can contain **subgroups**, like:
 company/
 frontend/
@@ -66,17 +66,17 @@ project-A
 backend/
 project-B
 
-####### 4. Shared Resources
+4. Shared Resources
 Groups can share:
 - **CI/CD variables** → available to all projects in the group.
 - **Runners** → one GitLab Runner for multiple projects in the group.
 - **Issue boards & milestones** → manage work across projects.
 - **Package registries** → publish Docker images, npm packages, etc. scoped by group.
 
-####### 5. Visibility
+5. Visibility
 - A group can be **private, internal, or public**, same as projects.
 
-####### ✅ In Short
+✅ In Short
 A **GitLab Group** = a way to **organize projects, manage users, and share CI/CD resources across multiple repos**.  
 
 > [!NOTE]
