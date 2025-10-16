@@ -107,23 +107,24 @@ Jenkins uses a **Master-Agent (Controller-Node)** architecture to distribute wor
 - A logical slot within an agent that runs a single build at a time.  
 - Each agent can have one or more executors depending on system capacity.
 
-#### Architecture Diagram (Text Overview)
-             +----------------------+
-             |      Jenkins Master   |
-             |-----------------------|
-             |  - Job Scheduling     |
-             |  - UI & Configuration |
-             |  - Plugin Management  |
-             +----------+------------+
-                        |
-                        | (via SSH, JNLP, HTTP)
-                        |
-   +--------------------+--------------------+
-   |                    |                    |
-+------+            +--------+           +--------+
-|Agent1|            |Agent2 |           |Agent3 |
-|Build |            |Docker |           |K8s Pod|
-+------+            +--------+           +--------+
+#### Architecture Diagram
+```text
++------------------------+
+|      Jenkins Master    |
+|------------------------|
+|  - Job Scheduling      |
+|  - UI & Configuration  |
+|  - Plugin Management   |
++------------------------+
+           |
+           | (via SSH, JNLP, HTTP)
+           |
++-----------+-----------+-----------+
+|           |           |           |
+| Agent1    | Agent2    | Agent3    |
+| Build     | Docker    | K8s Pod   |
++-----------+-----------+-----------+
+
 
 ## 2. References
 - [Tony Tech Lab - Jenkins Course](https://tonytechlab.com/courses/mastering-ci-cd-from-docker-to-k8s/lessons/1-3-1-ly-thuyet-jenkins-la-gi-kien-truc-master-agent/)
