@@ -124,7 +124,7 @@ Jenkins uses a **Master-Agent (Controller-Node)** architecture to distribute wor
 | Agent1    | Agent2    | Agent3    |
 | Build     | Docker    | K8s Pod   |
 +-----------+-----------+-----------+
-
+```
 
 ## 2. References
 - [Tony Tech Lab - Jenkins Course](https://tonytechlab.com/courses/mastering-ci-cd-from-docker-to-k8s/lessons/1-3-1-ly-thuyet-jenkins-la-gi-kien-truc-master-agent/)
