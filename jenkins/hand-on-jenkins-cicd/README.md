@@ -255,7 +255,7 @@ Then grant privilege
 * **Trigger:** Select `"Push events"`
 * Click **Test** to verify the connection.
 
-[Alt text](./images/gitlab-hook.jpg)
+![Alt text](./images/gitlab-hook.jpg)
 
 Please see https://plugins.jenkins.io/gitlab-plugin/#plugin-content-configuring-global-authentication for more information
 
@@ -271,7 +271,7 @@ Create **Username + Password Credentials**
 * **API Token:** `<PAT>`
 * **ID:** `gitlab-cred`
 
-[Alt text](./images/jenkins-credential.jpg)
+![Alt text](./images/jenkins-credential.jpg)
 
 ---
 
@@ -279,11 +279,11 @@ Create **Username + Password Credentials**
 
 **New Item → Enter name → Select “Pipeline” → OK**
 
-[Alt text](./images/jenkins-pipeline.jpg)
+![Alt text](./images/jenkins-pipeline.jpg)
 
 ##### Configure Trigger
 
-[Alt text](./images/jenkins-trigger.jpg)
+![Alt text](./images/jenkins-trigger.jpg)
 
 ##### Configure Pipeline
 
@@ -299,7 +299,7 @@ Choose:
 * **Branches to build:** e.g., `nodejs` or `*` for all branches
 * **Script Path:** Path to your `Jenkinsfile` (e.g., root directory)
 
-[Alt text](./images/jenkins-pipeline-gitlab.jpg)
+![Alt text](./images/jenkins-pipeline-gitlab.jpg)
 
 ---
 
@@ -341,11 +341,11 @@ git push origin main
 
 Now, you can run pipeline whenever you push code to your repository or you can run manually by click to **Build Now** button in your pipeline
 
-[Alt text](./images/jenkins-build.jpg)
+![Alt text](./images/jenkins-build.jpg)
 
 You can check your build result as below
 
-[Alt text](./images/jenkins-build-result.jpg)
+![Alt text](./images/jenkins-build-result.jpg)
 
 > **🎉 Success!** If all jobs pass (displayed in green), you have successfully set up the CI/CD pipeline.
 
