@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Environment Setup](#environment-setup)
-- [Create CICD WorkFlow with Jenkinsfile](#create-cicd-workflow-with-jenkinsfile)
+- [Create Simple CICD WorkFlow with Jenkinsfile](#create-cicd-workflow-with-jenkinsfile)
 - [Summary](#summary)
 
 **📋 Lab Objective:** This guide walks you through setting up a complete CI/CD environment using Jenkins integrating with Docker to automatically build and deploy applications.
@@ -74,6 +74,10 @@ If you prefer containerized setup, you can customize your jenkins with Dockerfil
 
 > [!NOTE]
 > Please install docker, docker-compose and have some basic knowledge about docker if you prefer this approach.
+> To install docer, docker-compose, please run these commands (For Linux Only)
+> dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+> dnf install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+> Please choose the correct version of docker for your OS
 
 My custom Dockerfile and docker-compose.yml
 
@@ -228,7 +232,7 @@ Then grant privilege
 
 ![Alt text](./images/jenkins-rbac.jpg)
 
-## Create CICD WorkFlow with Jenkinsfile
+## Create Simple CICD WorkFlow with Jenkinsfile
 
 ### Objective
 
