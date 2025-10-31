@@ -883,7 +883,7 @@ You need to create YAML files defining how the application runs on K8s (Deployme
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: corejs-prod # Namespace name for application
+  name: app-dev # Namespace name for application
 ```
 
 **File: k8s/registry-secret.yaml (Required if Registry is not public)**
@@ -893,8 +893,8 @@ K8s needs to know how to login to GitLab Registry to pull images.
 Create Secret on your machine (replace username/PAT):
 
 ```bash
-kubectl create secret docker-registry gitlab-registry-creds \
-  --docker-server=register.trongnv.xyz \
+kubectl create secret docker-registry docker-registry-creds \
+  --docker-server=registry-nexus.trongnv.xyz \
   --docker-username=YOUR_GITLAB_USERNAME \
   --docker-password=YOUR_GITLAB_PAT \
   --namespace=corejs-prod \
@@ -910,7 +910,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: corejs-backend
-  namespace: corejs-prod
+  namespace: app-dev
 spec:
   replicas: 1 # Number of pods to run
   selector:
@@ -927,7 +927,7 @@ spec:
       containers:
       - name: backend
         # Image built by Jenkins
-        image: tonytechlab/corejs-backend:latest 
+        image: registry-nexus.trongnv.xyz/projectmng/devops-coaching/corejs-backend:latest
         ports:
         - containerPort: 80 # Port backend listens on internally
 ```
@@ -957,7 +957,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: corejs-frontend
-  namespace: corejs-prod
+  namespace: app-dev
 spec:
   replicas: 1
   selector:
@@ -972,7 +972,7 @@ spec:
       - name: gitlab-registry-creds
       containers:
       - name: frontend
-        image: tonytechlab/corejs-frontend:latest # Built Nginx image
+        image: registry-nexus.trongnv.xyz/projectmng/devops-coaching/corejs-frontend:latest # Built Nginx image
         ports:
         - containerPort: 80 # Port Nginx listens on internally
 ```
@@ -1000,23 +1000,31 @@ spec:
 
 Push the `k8s` directory containing these files to GitLab.
 
-#### Step 2: Install kubectl in Jenkins (Already Done in Dockerfile)
+#### Step 2: Install kubectl in Jenkins Agent
+Update kubernetes repo
+```bash
+vim /etc/yum.repos.d/kubernetes.repo
+---
+[kubernetes]
+baseurl = https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
+enabled = 1
+gpgcheck = 1
+gpgkey = https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
+name = kubernetes
+---
+```
 
-The `jenkins/Dockerfile` already includes the step to install kubectl.
+Install kubectl
+```bash
+dnf install kubectl -y
+kubectl version
+```
 
 #### Step 3: Create K8s Credentials in Jenkins
 
 Jenkins needs permissions to connect and deploy to the K8s cluster.
 
-**Method 1 (Username/Password – Simple but less secure):**
-
-1. Go to Jenkins → Credentials → (global) → Add Credentials
-2. **Kind**: Username with password
-3. **Username**: `devops`
-4. **Password**: `devops@2025`
-5. **ID**: `k8s-user-creds`
-
-**Method 2 (Kubeconfig – Recommended):**
+**Kubeconfig:**
 
 1. SSH into `k8s-master-1`
 2. Copy contents of file `~/.kube/config`
@@ -1024,7 +1032,6 @@ Jenkins needs permissions to connect and deploy to the K8s cluster.
 4. **Kind**: Kubernetes configuration (kubeconfig)
 5. **ID**: `k8s-cluster-config`
 6. **Kubeconfig**: Select **Enter directly** and paste the config file contents
-7. **Note**: Using Kubeconfig is safer and more flexible. Jenkins Controller needs to mount volume `/project/kube/.kube:/root/.kube` (as in docker-compose.yml) for kubectl to work.
 
 #### Step 4: Update Jenkinsfile (Add K8s Deploy Stage)
 
@@ -1035,7 +1042,7 @@ Edit the Jenkinsfile in the `corejs` project.
 ```groovy
 environment {
     // ... (existing variables) ...
-    K8S_NAMESPACE     = 'corejs-prod'
+    K8S_NAMESPACE     = 'app-dev'
     K8S_CREDENTIAL_ID = 'k8s-cluster-config' // Kubeconfig credential ID
 }
 ```
@@ -1093,6 +1100,8 @@ Push the new Jenkinsfile and `k8s` directory to GitLab.
 3. Stage 4 will run `kubectl apply`
 4. After success, check Console Output to get NodePort
 5. Access application via browser at: `http://<node-ip>:<nodePort>` (Example: `http://192.168.110.151:30080`)
+
+![Alt text](./images/k8s_deploy_success.png)
 
 ---
 
