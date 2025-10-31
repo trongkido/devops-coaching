@@ -32,7 +32,9 @@ This "All-in-One" model is suitable for:
 ```
 
 As in previous section, I have mentioned about setting up Gitlab server and Jenkins server, Please refer at these sites:
+
 https://github.com/trongkido/devops-coaching/tree/main/git-cicd/hands-on-cicd-lab
+
 https://github.com/trongkido/devops-coaching/tree/main/jenkins/hand-on-jenkins-cicd
 
 ## Environment Setup
@@ -860,6 +862,8 @@ git push origin <branch-name>
    - **Frontend**: `http://192.168.88.16:8081` (Replace host IP and port if you set differently in Jenkinsfile)
    - **Backend**: `http://192.168.88.16:5001`
 
+![Alt text](./images/Docker_deploy_result.png)
+
 ### Phase 5 (Advanced): Deploy to Kubernetes 🚢
 
 After mastering "All-in-one Deployment", you can upgrade the pipeline to deploy the application to a Kubernetes cluster instead of Docker host. This is a preliminary guide; you'll need to adjust details as appropriate.
@@ -890,7 +894,7 @@ Create Secret on your machine (replace username/PAT):
 
 ```bash
 kubectl create secret docker-registry gitlab-registry-creds \
-  --docker-server=register.tonytechlab.com \
+  --docker-server=register.trongnv.xyz \
   --docker-username=YOUR_GITLAB_USERNAME \
   --docker-password=YOUR_GITLAB_PAT \
   --namespace=corejs-prod \
