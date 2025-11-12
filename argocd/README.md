@@ -152,52 +152,45 @@ Opt for Pull-Based Deployment to prioritize security, scalability, and modularit
 
 #### 🚀 Jenkins
 
-**Role:** CI/CD (Continuous Integration & Delivery)\
-**Philosophy:** *Imperative* -- You "command" it: build, push, apply.\
-**Model:** *Push*. Jenkins (from outside) actively pushes configuration
-files into K8s.\
-**Scope:** Very broad. Can build and deploy anywhere (VMs, Docker, K8s,
-mobile...).\
+**Role:** CI/CD (Continuous Integration & Delivery).
+**Philosophy:** *Imperative* -- You "command" it: build, push, apply.
+**Model:** *Push*. Jenkins (from outside) actively pushes configuration files into K8s.
+**Scope:** Very broad. Can build and deploy anywhere (VMs, Docker, K8s, mobile...).
 **Focus:** Extremely strong in CI (Build, Test, Scan).
 
 ------------------------------------------------------------------------
 
 #### 🐙 Argo CD
 
-**Role:** GitOps CD (Continuous Delivery & Synchronization)\
-**Philosophy:** *Declarative* -- You "declare" the desired state in Git,
-and Argo CD automatically "fixes" K8s to match it.\
-**Model:** *Pull*. Argo CD (inside K8s) pulls changes from Git.\
-**Scope:** Specialized (K8s-native). Works with any Kubernetes cluster,
-whether on-premise (like our lab) or cloud (Azure AKS, Google GKE,
-Amazon EKS).\
+**Role:** GitOps CD (Continuous Delivery & Synchronization).
+**Philosophy:** *Declarative* -- You "declare" the desired state in Git, and Argo CD automatically "fixes" K8s to match it.
+**Model:** *Pull*. Argo CD (inside K8s) pulls changes from Git.
+**Scope:** Specialized (K8s-native). Works with any Kubernetes cluster, whether on-premise (like our lab) or cloud (Azure AKS, Google GKE, Amazon EKS).
 **Focus:** Exceptionally strong in CD (Sync, Audit, Drift Detection).
 
 ------------------------------------------------------------------------
 
 #### Why use Argo CD when Jenkins already exists?
 
-In a traditional CI/CD model, Jenkins holds the kubeconfig and has admin rights to run `kubectl apply`.\
-This setup works but is **not secure** and **not GitOps-compliant**.\ Argo CD solves three major issues:
+In a traditional CI/CD model, Jenkins holds the kubeconfig and has admin rights to run `kubectl apply`. This setup works but is **not secure** and **not GitOps-compliant**. Argo CD solves three major issues:
 
-#### Git as the Single Source of Truth (SSoT)
+##### 1. Git as the Single Source of Truth (SSoT)
 
 This is the most important concept of GitOps. Think of SSoT as the *single blueprint* for your entire system.
 
-**Real-world analogy:**\
-Instead of 10 people editing 10 different copies of a Word file, the whole team collaborates on one Google Doc. Every change and comment happens there. That Google Doc is the *Single Source of Truth*.
+**Real-world analogy:** Instead of 10 people editing 10 different copies of a Word file, the whole team collaborates on one Google Doc. Every change and comment happens there. That Google Doc is the *Single Source of Truth*.
 
 In GitOps, the Git repository containing your YAML files **is** that SSoT. If you want to change something (e.g., scale replicas from 3 → 5), you don't run `kubectl edit` (a local copy). Instead, you create a **Pull Request** proposing the change in the "blueprint."
 
 ------------------------------------------------------------------------
 
-#### Drift Detection & Self-Healing
+##### 2. Drift Detection & Self-Healing
 
 If someone manually edits a Deployment in Rancher, Argo CD will detect it (show "OutOfSync") and --- if enabled --- automatically correct K8s back to match the Git code.
 
 ------------------------------------------------------------------------
 
-#### Security (Role Separation)
+##### 3. Security (Role Separation)
 
 Jenkins no longer needs to hold the Kubernetes kubeconfig. Its job now is simply: build the image and push code to a **second Git repository**. Only Argo CD has permission to modify K8s.
 
@@ -226,21 +219,25 @@ This is the ideal upgraded model all learners should aim for:
     (6) Kubernetes Cluster
          ↳ Argo CD detects and syncs the new YAML
 
-**Summary:**\
-- Developer pushes app code to GitHub.\
-- Jenkins automatically builds, tests, and pushes image (e.g.,
-`maf-tool:v1.1.0`).\
-- Jenkins then edits the GitOps repo, changing `image: ...:latest` →
-`image: ...:v1.1.0`, and pushes.\
-- Argo CD watches the GitOps repo, detects a new commit, and syncs
-changes automatically to K8s.
+**Summary:**
+- Developer pushes app code to GitHub.
+- Jenkins automatically builds, tests, and pushes image (e.g., `maf-tool:v1.1.0`).
+- Jenkins then edits the GitOps repo, changing `image: ...:latest` → `image: ...:v1.1.0`, and pushes.
+- Argo CD watches the GitOps repo, detects a new commit, and syncs changes automatically to K8s.
 
 ------------------------------------------------------------------------
 
 #### When is Argo CD not necessary?
 
--   When you're **not using Kubernetes**.\
+-   When you're **not using Kubernetes**.
 -   When your lab is very small (1--2 apps) and you're comfortable
     applying manifests manually or via Jenkins.
 
 For any **production system** (or a complex lab) that is evolving, integrating Argo CD is the next logical step.
+
+## 📚 References
+- [Tony Tech Lab - Jenkins Course](https://tonytechlab.com/courses/mastering-ci-cd-from-docker-to-k8s/lessons/1-3-1-ly-thuyet-jenkins-la-gi-kien-truc-master-agent/)
+- [Jenkins Official Documentation](https://www.jenkins.io/doc/)
+- [ArgoCD Official](https://argo-cd.readthedocs.io/en/stable/understand_the_basics/)
+- [ArgoCD](https://spacelift.io/blog/argocd)
+- [Push-vs-pull-based](https://dev.to/mohamednasser018/push-vs-pull-based-deployments-4m78)
