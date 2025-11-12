@@ -18,7 +18,7 @@ This repository contains notes, exercises, and lab materials for learning **Argo
 
 Argo CD is described as “a declarative, GitOps continuous delivery tool for Kubernetes.” It can monitor your source repositories and automatically deploy changes to your cluster.
 
-![Alt text](./images/argocd_introduce.jpg)
+![Alt text](./images/argocd_introduce.jpeg)
 
 Kubernetes orchestrates container deployment and management tasks. It starts your containers, replaces them when they fail, and scales your service across the compute nodes in your cluster.
 
