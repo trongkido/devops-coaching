@@ -172,4 +172,6 @@ Let's check the result now
 That's all, you can choose many different labs about ArgoCD, good luck.
 
 ## Summary
+In this lab, you have successfully:
 
+✅ Run a CD pipeline with ArgoCD, there are many different use cases, so please practice as much as possible.
