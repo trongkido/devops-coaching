@@ -212,4 +212,104 @@ Fill out the information
 Finally, add user to repo
 ![Alt text](./images/harbor-add-user-to-repo.png)
 
+#### Install Helm
+We need to install helm and helm-push plugin in order to push your chart to harbor registry
+```bash
+# Install helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+helm version
+# Install helm push plugin
+helm plugin install https://github.com/chartmuseum/helm-push
+# Test login with created user
+helm registry login harbor-registry.trongnv.xyz:8088 -u helm-repo
+```
+
+Now, we will use helm create to create the standard directory structure, then “clean up” (empty) unnecessary template files
+```bash
+# Create folder
+mkdir -p /opt/helm && cd /opt/helm
+# Create new helm chart
+helm create app-template
+# Update service file
+cd app-template
+vim templates/service.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app-template.fullname" . }}
+  labels:
+    {{- include "app-template.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+  selector:
+    {{- include "app-template.selectorLabels" . | nindent 4 }}
+---
+
+# Update value.yaml file
+vim values_tpl.yaml
+---
+replicaCount: 1
+serviceAccount:
+  create: false
+image:
+  repository: registry-nexus.trongnv.xyz/easy-rbac/easy-rbac
+  tag: lastest
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+  - name: nexus-registry-secret
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: 
+      paths:
+        - path: /
+          pathType: Prefix
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+---
+```
+
+Now, package the helm chart and push it to harbor registry
+```bash
+# Package the helm chart
+cd /opt/helm
+helm package app-template
+# Push to registry
+helm push app-template-0.1.0.tgz oci://harbor-registry.trongnv.xyz:8088/devops-coaching/app-template
+```
+
+You can check the package in harbor registry
+![Alt text](./images/harbor-helm-package.png)
+
+## CICD with ArgoCD and Harbor
+We need to connect ArgoCD to Harbor repo, on ArgoCD web UI, choose "Setting -> Repositories"
+![Alt text](./images/argocd-create-repo.png)
+
+Click "Connect Repo"
+![Alt text](./images/argocd-create-repo-step2.png)
+
+Fill out the information and click "Save"
+![Alt text](./images/argocd-create-repo-step3.png)
+
+Now, ArgoCD can connect to Harbor registry
+![Alt text](./images/argocd-create-repo-success.png)
 
