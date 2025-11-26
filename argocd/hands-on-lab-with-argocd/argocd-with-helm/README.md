@@ -264,16 +264,20 @@ image:
   pullPolicy: IfNotPresent
 imagePullSecrets:
   - name: nexus-registry-secret
+serviceAccount:
+  create: false
 service:
+  name: http
   type: ClusterIP
   port: 80
   targetPort: 80
+  protocol: TCP
 ingress:
   enabled: true
   className: "nginx"
   annotations: {}
   hosts:
-    - host: 
+    - host: "easy-rbac.trongnv.xyz"
       paths:
         - path: /
           pathType: Prefix
@@ -287,6 +291,8 @@ readinessProbe:
     port: http
 ---
 ```
+
+For the full helm chart, please get more information on https://github.com/trongkido/easy-rbac/tree/main/helm/app-template
 
 Now, package the helm chart and push it to harbor registry
 ```bash
@@ -312,4 +318,12 @@ Fill out the information and click "Save"
 
 Now, ArgoCD can connect to Harbor registry
 ![Alt text](./images/argocd-create-repo-success.png)
+
+Now, we can create an application on ArgoCD with Harbor repo. In Application, choose New App
+![Alt text](./images/argocd-create-app.png)
+
+Fill out the information to create new application
+![Alt text](./images/argocd-create-app-step2.png)
+
+
 
