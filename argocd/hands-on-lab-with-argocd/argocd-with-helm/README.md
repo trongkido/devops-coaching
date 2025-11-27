@@ -322,8 +322,16 @@ Now, ArgoCD can connect to Harbor registry
 Now, we can create an application on ArgoCD with Harbor repo. In Application, choose New App
 ![Alt text](./images/argocd-create-app.png)
 
-Fill out the information to create new application
+Fill out the information to create new application, and click "Create"
 ![Alt text](./images/argocd-create-app-step2.png)
 
+Now, wait ArgoCD sync application
+![Alt text](./images/argocd-create-app-step3.png)
+
+Update the domain in Cloudflared Tunnel
+![Alt text](./images/cloudflared-update-domain.png)
+
+Finally, check the application status
+![Alt text](./images/application-status.png)
 
 
