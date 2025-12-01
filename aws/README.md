@@ -3,14 +3,14 @@
 ---
 
 ## 📑 Table of Contents
-[Introduction to AWS](#1-introduction-to-aws)
+[Introduction to AWS](#introduction-to-aws)
 [AWS Basic Services](#aws-basic-services)
-[Create an AWS Free Tier Account (Step-by-Step)](#2-create-an-aws-free-tier-account-step-by-step)
-[Create an IAM User Account](#3-create-an-iam-user-account)
-[Create Access Keys for IAM User](#4-create-access-keys-for-iam-user)
-[Install & Configure AWS CLI](#5-install--configure-aws-cli)
-[Summary](#6-summary)
-[References](#7-references)
+[Create an AWS Free Tier Account (Step-by-Step)](#create-an-aws-free-tier-account-step-by-step)
+[Create an IAM User Account](#create-an-iam-user-account)
+[Create Access Keys for IAM User](#create-access-keys-for-iam-user)
+[Install & Configure AWS CLI](#install--configure-aws-cli)
+[Summary](#summary)
+[References](#references)
 
 ---
 
