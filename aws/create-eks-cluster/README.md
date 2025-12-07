@@ -240,6 +240,7 @@ To delete an eks cluster, we can run command
 ```bash
 eksctl delete cluster -f eks-cluster.yaml
 ```
+![Alt text](./images/eks-cluster-delete.png)
 
 This will remove ALL resources that eksctl created:
 
