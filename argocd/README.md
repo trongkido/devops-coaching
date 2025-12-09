@@ -136,7 +136,7 @@ Steeper Learning Curve: Requires additional setup and understanding of GitOps to
 
 * * *
 
-\_\_Key Takeaways
+Key Takeaways
 
 [![ ](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F7kwovbgf0gd322w25si6.jpg)](https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F7kwovbgf0gd322w25si6.jpg)
 
