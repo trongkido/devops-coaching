@@ -249,5 +249,5 @@ Your subdomain	ALB DNS Name (from kubectl get ingress)
 ![Alt text](./images/argocd-cloudflare.png)
 
 Check access
-![Alt text](./images/argocd-eks-login.png)
+![Alt text](./images/argocd-eks-login.jpeg)
 
