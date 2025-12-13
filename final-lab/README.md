@@ -132,6 +132,7 @@ This will:
   * Open browser for Google login
   * Ask you to select or create a project
   * Set default region/zone
+
 Result:
 ```text
 Welcome! This command will take you through the configuration of gcloud.
@@ -261,8 +262,9 @@ To set the active account, run:
     $ gcloud config set account `ACCOUNT`
 ```
 
+Now, we will use gcloud to create a GKE Cluster
 ```bash
-gcloud beta container --project "pelagic-pod-476510-v7" clusters create "trong-lab-gke-cluster" 
+gcloud beta container --project "pelagic-pod-476510-v7" clusters create "trong-lab-gke-cluster" \ 
     --zone "us-central1-c" \
     --no-enable-basic-auth \
     --cluster-version "1.33.5-gke.1308000" \
@@ -296,6 +298,98 @@ gcloud beta container --project "pelagic-pod-476510-v7" clusters create "trong-l
     --shielded-integrity-monitoring \
     --no-shielded-secure-boot \
     --node-locations "us-central1-c"
+```
+![Alt text](./images/gke-create.png)
+
+Once the cluster is created execute the below command to connect to the Cluster
+```bash
+gcloud container clusters get-credentials "trong-lab-gke-cluster" --zone us-central1-c
+```
+![Alt text](./images/gke-get-credential.png)
+
+Install gke-gcloud-auth-plugin before using kubectl command.
+>[!Note]
+> This will also resolve the "ERROR" log in create cluster step
+```bash
+gcloud components install gke-gcloud-auth-plugin
+```
+
+Result:
+```tetx
+Your current Google Cloud CLI version is: 549.0.1
+Installing components from version: 549.0.1
+
+┌────────────────────────────────────────────────────────────────┐
+│              These components will be installed.               │
+├────────────────────────────────────────────┬─────────┬─────────┤
+│                    Name                    │ Version │   Size  │
+├────────────────────────────────────────────┼─────────┼─────────┤
+│ gke-gcloud-auth-plugin (Platform Specific) │  0.5.10 │ 3.3 MiB │
+└────────────────────────────────────────────┴─────────┴─────────┘
+
+For the latest full release notes, please visit:
+  https://cloud.google.com/sdk/release_notes
+
+Once started, canceling this operation may leave your SDK installation in an inconsistent state.
+
+Do you want to continue (Y/n)?  y
+
+Performing in place update...
+
+╔════════════════════════════════════════════════════════════╗
+╠═ Downloading: gke-gcloud-auth-plugin                      ═╣
+╠════════════════════════════════════════════════════════════╣
+╠═ Downloading: gke-gcloud-auth-plugin (Platform Specific)  ═╣
+╠════════════════════════════════════════════════════════════╣
+╠═ Installing: gke-gcloud-auth-plugin                       ═╣
+╠════════════════════════════════════════════════════════════╣
+╠═ Installing: gke-gcloud-auth-plugin (Platform Specific)   ═╣
+╚════════════════════════════════════════════════════════════╝
+
+Performing post processing steps...done.
+
+Google Cloud CLI works best with Python 3.13 and certain modules.
+
+Setting up virtual environment
+Updating modules...
+Modules updated.
+Virtual env enabled.
+
+Update done!
+```
+
+Now, check nodes status
+```bash
+kubectl get nodes
+```
+![Alt text](./images/gke-get-node.png)
+
+To delete a GKE cluster, please run this command:
+```bash
+# Delete GKE Cluster
+gcloud container clusters delete trong-lab-gke-cluster \
+  --zone us-central1-c \
+  --project pelagic-pod-476510-v7
+# Delete kube context
+kubectl config delete-context gke_pelagic-pod-476510-v7_us-central1-c_trong-lab-gke-cluster
+kubectl config delete-cluster gke_pelagic-pod-476510-v7_us-central1-c_trong-lab-gke-cluster
+kubectl config unset users.gke_pelagic-pod-476510-v7_us-central1-c_trong-lab-gke-cluster
+```
+
+Verify
+```bash
+gcloud container clusters list \
+  --zone us-central1-c \
+  --project pelagic-pod-476510-v7
+```
+
+2. **Create Google Artifact Registry**
+Create Google Artifact Registry
+```bash
+gcloud artifacts repositories create devops-coaching \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Docker repository for lab"
 ```
 
 
