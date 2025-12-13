@@ -35,4 +35,24 @@ The company **“LAB Finance Global”** requires a CI/CD application deployment
 ### CI/CD Pipeline Workflow
 ![Alt text](./images/Lab-CI-CD-Final-scaled.png)
 
+---
 
+## ENVIRONMENT SETUP
+### On DR Site (On-Premise)
+You can follow these instruction to setup environment in Local
+- K8s Cluster: https://medium.com/@brunosquassoni/creating-a-kubernetes-cluster-step-by-step-bd9ae3c85275 or https://devopscube.com/setup-kubernetes-cluster-kubeadm/
+- Jenkins: https://github.com/trongkido/devops-coaching/blob/main/jenkins/hand-on-jenkins-cicd/README.md
+- Gitlab: https://github.com/trongkido/devops-coaching/blob/main/git-cicd/hands-on-cicd-lab/README.md
+- Harbor: https://github.com/trongkido/devops-coaching/blob/main/argocd/hands-on-lab-with-argocd/argocd-with-helm/README.md
+
+### On Cloud
+For Cloud environment
+If you want to use AWS, please follow these intructions
+- https://github.com/trongkido/devops-coaching/tree/main/aws
+- https://github.com/trongkido/devops-coaching/tree/main/aws/create-eks-cluster
+- 
+
+In this module, I will using Google Cloud GKE and Google Cloud Artifact Registry
+#### Create a Google Cloud GKE Cluster
+ 
+ 
