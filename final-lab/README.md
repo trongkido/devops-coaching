@@ -61,4 +61,10 @@ Please follow this guide
 Please follow this guide
 - https://github.com/trongkido/devops-coaching/blob/main/gcp/gcp-artifact-registry/README.md
 
+**Setup ArgoCD on GKE Cluster**
+Please follow this guide
+- 
 
+**Setup Github Repository**
+Please follow this guide
+- https://www.geeksforgeeks.org/git/creating-repository-in-github/
