@@ -101,7 +101,175 @@ Login using:
 
 **Create Loadblancer IP**
 ```bash
-kubectl patch svc argocd-server -n argocd -p ‘{“spec”: {“type”: “LoadBalancer”}}’
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"LoadBalancer"}}'
+
+# Verify
+kubectl get svc argocd-server -n argocd                                                                                                ─╯
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                      AGE
+argocd-server   LoadBalancer   34.118.238.73   34.135.137.205   80:30323/TCP,443:30168/TCP   135m
 ```
 
+Access to the Loadbalance IP
+http://34.135.137.205
 
+**GKE Ingress Configuration**
+1. Create an Externally Accessible Service with NEG Annotation
+Annotate the existing argocd-server service to use Network Endpoint Groups (NEGs). This allows the ALB to send traffic directly to pods.
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server-external
+  namespace: argocd
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"ports": {"http":"argocd-backend-config"}}'
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: argocd-server
+```
+
+Apply the changes
+```bash
+kubectl apply -f argocd-server-external.yaml
+```
+
+2. Create BackendConfig
+Define health checks using a BackendConfig custom resource, referenced by the service. 
+```yaml
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: argocd-backend-config
+  namespace: argocd
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /healthz
+    port: 8080
+```
+
+Apply the BackendConfig
+```bash 
+kubectl apply -f argocd-backend-config.yaml
+```
+
+3. Create FrontendConfig
+Now we will create Frontend Config that will redirect HTTP to HTTPS
+```yaml
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: argocd-frontend-config
+  namespace: argocd
+spec:
+  redirectToHttps:
+    enabled: true
+```
+
+Apply the FrontendConfig
+```bash
+kubectl apply -f argocd-frontend-config.yaml
+```
+
+4. Create Global Static IP
+Create a static global IP which will be mapped to DNS
+```bash
+gcloud compute addresses create argocd-ingress-ip --global --ip-version IPV4
+```
+
+5. Create ManagedCertificate
+Here we will be creating Managed SSL certificate which will be used in the Load balancer
+```yaml
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: argocd-gke-cert
+  namespace: argocd
+spec:
+  domains:
+    - gke-argocd.trongnv.xyz
+```
+
+Apply the cert
+```bash
+kubectl apply -f argocd-gke-cert.yaml
+```
+
+Verify cert
+```bash
+kubectl get managedcertificate -n argocd                                                                                               ─╯
+NAME              AGE   STATUS
+argocd-gke-cert   25m   Provisioning
+```
+
+You must wait until the status is "Active", then the cert is working now.
+
+6. Create Ingress
+Finally, we will be creating an Ingress object which is having reference to our frontend config, service, and managed certificate.
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: argocd-ingress-ip
+    networking.gke.io/managed-certificates: argocd-gke-cert
+    networking.gke.io/v1beta1.FrontendConfig: argocd-frontend-config
+spec:
+  rules:
+    - host: gke-argocd.trongnv.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server-external
+                port:
+                  number: 80
+```
+
+Apply the Ingress
+```bash
+kubectl apply -f gke-argocd-ingress.yaml
+```
+
+Get the public ip address
+```bash
+kubectl get ingress argocd -n argocd
+```
+
+Go to Cloudflare → DNS → Records
+| Field        | Value            |
+| ------------ | ---------------- |
+| Type         | `A`              |
+| Name         | `gke-argocd`     |
+| IPv4 address | `34.110.217.166` |
+| TTL          | Auto             |
+| Proxy status | **DNS only** ⚠️  |
+
+IMPORTANT
+- Cloudflare orange cloud must be OFF
+- Must be gray cloud (DNS only)
+
+![Alt-text](./images/cloudflare-gke-argocd.png)
+
+Verify
+```bash
+dig gke-argocd.trongnv.xyz +short
+```
+
+Check access
+![Alt-text](./images/gke-argocd-access.jpeg)

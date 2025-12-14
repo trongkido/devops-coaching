@@ -73,4 +73,8 @@ Please follow this guide
 Please follow this guide
 - https://www.geeksforgeeks.org/git/creating-repository-in-github/
 
+### Config 
+For lab project, I will use my small project
+https://github.com/trongkido/easy-rbac
+
 
