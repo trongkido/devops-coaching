@@ -77,3 +77,31 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 The output is your **admin password**.
 
+## Step 2: Access to ArgoCD Web UI
+
+**Create a Local Tunnel with Port Forwarding**
+
+Keep the CMD terminal open and run:
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Explanation:
+This command forwards:
+- **localhost:8080** → **Argo CD server port 443 (HTTPS)**
+
+Then access Argo CD in your browser:
+
+👉 http://localhost:8080
+
+Login using:
+- **Username:** `admin`
+- **Password:** your **admin password**
+
+**Create Loadblancer IP**
+```bash
+kubectl patch svc argocd-server -n argocd -p ‘{“spec”: {“type”: “LoadBalancer”}}’
+```
+
+
