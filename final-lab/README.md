@@ -51,6 +51,7 @@ If you want to use AWS, please follow these intructions
 - https://github.com/trongkido/devops-coaching/tree/main/aws
 - https://github.com/trongkido/devops-coaching/tree/main/aws/create-eks-cluster
 - https://github.com/trongkido/devops-coaching/blob/main/aws/aws-ecr/README.md
+- https://github.com/trongkido/devops-coaching/blob/main/aws/deploy-helm/README.md
 
 In this module, I will using Google Cloud GKE and Google Cloud Artifact Registry
 **Create a Google Cloud GKE Cluster**
@@ -63,8 +64,13 @@ Please follow this guide
 
 **Setup ArgoCD on GKE Cluster**
 Please follow this guide
-- 
+- https://github.com/trongkido/devops-coaching/blob/main/gcp/create-gke-cluster/running-argocd-on-gke/README.md 
+
+**Setup Ingress Nginx on GKE Cluster**
+
 
 **Setup Github Repository**
 Please follow this guide
 - https://www.geeksforgeeks.org/git/creating-repository-in-github/
+
+

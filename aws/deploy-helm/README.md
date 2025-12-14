@@ -123,10 +123,10 @@ argocd      argocd-server-ingress        alb     *                           k8s
 
 Enable **Proxy (orange cloud)**.
 
-![Alt text](./images/cloadflare-add-cname.png)
+![Alt text](./images/cloudflare-add-cname.png)
 
 Access your app: https://aws-easy-rbac.trongnv.xyz
-![Alt text](./images/app-access.png)
+![Alt text](./images/app-success.png)
 
 ---
 
