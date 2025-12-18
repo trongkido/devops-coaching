@@ -68,7 +68,7 @@ Please follow this guide
 
 **Setup Ingress Nginx on GKE Cluster**
 Follow this guide
-- 
+- https://github.com/trongkido/devops-coaching/blob/main/gcp/create-gke-cluster/ingress-nginx-on-gke/README.md
 
 **Setup Github Repository**
 Please follow this guide
@@ -127,7 +127,7 @@ After that, we will connect GKE ArgoCD with github project that manage the helm 
 Now, we will prepare a pipeline with groovy script (Jenkinsfile)
 ```groovy
 pipeline {
-  agent none 
+  agent none
 
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
@@ -136,19 +136,23 @@ pipeline {
   environment {
     // Variables for docker build and k8s deployment
     APP_NAME = "easy-rbac"
-    #APP_SERVICE_NAME = "${env.APP_NAME}-svc"
-    #APP_INGRESS_NAME = "${env.APP_NAME}-ingress"
-    #APP_HOST_URL = "http://easy-rbac.trongnv.xyz" 
+    APP_HOST = "easy-rbac.trongnv.xyz"
     DOCKER_REGISTRY = "https://registry-nexus.trongnv.xyz"
     REGISTRY_HOST = DOCKER_REGISTRY.replace("https://", "").replace("http://", "")
     DOCKER_CREDENTIALS = credentials('docker-login')
     APP_IMAGE_NAME = "${env.REGISTRY_HOST}/${env.APP_NAME}/${env.APP_NAME}"
     APP_IMAGE_TAG = "${BUILD_NUMBER}"
-    K8S_NAMESPACE = 'app-dev'
+    PULL_SECRET = "nexus-registry-secret"
+    K8S_NAMESPACE = "app-dev"
+    HARBOR_URL = "https://harbor-registry.trongnv.xyz"
+    HARBOR_HOST = HARBOR_URL.replace("https://", "").replace("http://", "")
+    HARBOR_PROJECT = "devops-coaching"
+    HELM_CHART = "app-template"
+    HARBOR_CREDENTIALS = credentials('helm-login')
   }
 
   stages {
-    
+
     // --- Stage 1: Get latest code ---
     stage('1. Checkout Code') {
       agent {
@@ -156,7 +160,7 @@ pipeline {
       }
       steps {
         echo 'Starting to check out code from Gitlab...'
-        checkout scm 
+        checkout scm
         echo "SUCCESS: Code checked out from Gitlab."
       }
     }
@@ -169,24 +173,61 @@ pipeline {
       steps {
         // Build
         echo "INFO: Building App image: ${env.APP_IMAGE_NAME}"
-        sh "docker build -t ${env.APP_IMAGE_NAME}:${env.APP_IMAGE_TAG} ."
+        sh "docker build -t ${APP_IMAGE_NAME}:${APP_IMAGE_TAG} ."
         echo "INFO: Building App image: ${env.APP_IMAGE_NAME} successfylly"
 
         // Push to local registry
         echo "INFO: Pushing App image to local registry ${env.DOCKER_REGISTRY}..."
         sh '''
               echo $DOCKER_CREDENTIALS_PSW | docker login ${DOCKER_REGISTRY} -u $DOCKER_CREDENTIALS_USR --password-stdin
-              docker push ${env.APP_IMAGE_NAME}:${env.APP_IMAGE_TAG}
-              docker logout ${env.DOCKER_REGISTRY}
+              docker push ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
+              docker logout ${DOCKER_REGISTRY}
            '''
-        echo "INFO: Pushing App image to local registry ${env.DOCKER_REGISTRY} successfully" 
+        echo "INFO: Pushing App image to local registry ${env.DOCKER_REGISTRY} successfully"
       }
+    }
 
-      // --- Stage 3: Update manifest ---
-      
+    // --- Stage 3: Update helm template and push to harbor ---
+    stage('3. Update helm template and push to harbor') {
+      agent {
+        label 'docker-lab'
+      }
+      steps {
+        echo "INFO: Updating helm template..."
+        sh '''
+              echo $HARBOR_CREDENTIALS_PSW | helm registry login ${HARBOR_HOST}:8088 -u $HARBOR_CREDENTIALS_USR --password-stdin
+              helm pull oci://${HARBOR_HOST}:8088/${HARBOR_PROJECT}/${HELM_CHART} --destination /tmp/
+              if [ ! -f /usr/bin/yq ]; then
+                 curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq
+                 chmod +x /usr/bin/yq
+              fi
+              if [ ! -f /usr/bin/jq ]; then
+                 curl -L https://github.com/jqlang/jq/releases/latest/download/jq-linux-amd64 /usr/bin/jq
+                 chmod +x /usr/bin/jq
+              fi
+	      helm_version=$(curl -s -u $HARBOR_CREDENTIALS_USR:$HARBOR_CREDENTIALS_PSW "${HARBOR_URL}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HELM_CHART}/artifacts" | jq -r '.[].tags[].name')
+	      cd /tmp/ && tar -xf ${HELM_CHART}-${helm_version}.tgz
+              rm /tmp/${HELM_CHART}-${helm_version}.tgz -f
+              cd /tmp/${HELM_CHART}
+              yq e -i '
+                .imagePullSecrets = [{"name": strenv(PULL_SECRET)}] |
+  		.image.repository = strenv(APP_IMAGE_NAME) |
+  		.image.tag = strenv(APP_IMAGE_TAG) |
+  		.ingress.hosts[0].host = strenv(APP_HOST)
+	      ' values.yaml
+              cd /tmp/
+              helm package ${HELM_CHART}
+              helm push ${HELM_CHART}-${helm_version}.tgz oci://${HARBOR_HOST}:8088/${HARBOR_PROJECT}
+              cd /tmp/ && rm ${HELM_CHART}-${helm_version}.tgz ${HELM_CHART} -rf
+              helm registry logout ${HARBOR_HOST}:8088
+          '''
+          echo "INFO: Updated helm template successfully"
+      }
     }
   }
 }
+
+
 ```
 
 
