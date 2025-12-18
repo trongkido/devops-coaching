@@ -5,6 +5,7 @@
 > - https://github.com/trongkido/devops-coaching/blob/main/gcp/create-gke-cluster/running-argocd-on-gke/README.md
 > - https://gist.github.com/gabihodoroaga/1289122db3c5d4b6c59a43b8fd659496
 > - https://support.tools/setup-nginx-ingress-gke/
+
 > The prerequisite is that the ingress nginx service must be "ClusterIP" or "NodePort", so please modify Ingress Nginx service in advanced.
 
 **In this lab, I will use Ingress Nginx with public IP and Cert Manager deployed in GKE for manage certificates**
