@@ -124,7 +124,7 @@ Then, we need to add harbor helm repository on local ArgoCD
 After that, we will connect GKE ArgoCD with github project that manage the helm template
 [Alt text](./images/final-lab-gke-argocd-add-repo.png)
 
-Now, we will prepare a pipeline with groovy script (Jenkinsfile)
+Now, we will prepare a CI pipeline with groovy script (Jenkinsfile) to build image, update values.yaml file and push to repository.
 ```groovy
 pipeline {
   agent none
@@ -149,6 +149,10 @@ pipeline {
     HARBOR_PROJECT = "devops-coaching"
     HELM_CHART = "app-template"
     HARBOR_CREDENTIALS = credentials('helm-login')
+    LOCAL_GITLAB_URL = "https://mygitlab.trongnv.xyz"
+    LOCAL_GITLAB_PROJECT_ID = "3"
+    LOCAL_GITLAB_BRANCH = "main"
+    LOCAL_GITLAB_TOKEN = credentials('pipeline-token')
   }
 
   stages {
@@ -224,17 +228,267 @@ pipeline {
           echo "INFO: Updated helm template successfully"
       }
     }
+
+    // --- Stage 4: Deploy app to on-prem k8s cluster with local argocd ---
+    stage('4. Deploy app to on-prem k8s cluster with local argocd') {
+      agent {
+        label 'docker-lab'
+      }
+      steps {
+          sh '''
+                echo "Push trigger to gitlab CD pipeline!!!"
+                curl -X POST \
+                  --form token=$LOCAL_GITLAB_TOKEN \
+                  --form ref=$LOCAL_GITLAB_BRANCH \
+                  --form variables[LOCAL_APP_NAME]="${APP_NAME}" \
+                  --form variables[LOCAL_PROJECT]="dev-homelab" \
+                  --form variables[LOCAL_HELM_REPO]="$HARBOR_HOST:8088/$HARBOR_PROJECT" \
+                  --form variables[HELM_CHART]="$HELM_CHART" \
+                  --form variables[HELM_VERSION]="0.1.1" \
+                  --form variables[LOCAL_K8S_CLUSTER]="https://kubernetes.default.svc" \
+                  --form variables[APP_NAMESPACE]="K8S_NAMESPACE" \
+                  --form variables[VALUE_FILE]="values.yaml" \
+                  $LOCAL_GITLAB_URL/api/v4/projects/$LOCAL_GITLAB_PROJECT_ID/trigger/pipeline
+             '''
+      }
+    }
   }
 }
+```
 
+Before running this CI pipeline, you must create these essential requirements
+You need to generate a gitlab trigger pipeline token
+![Alt text](./images/final-lab-gen-trigger-token.png)
 
+Then add the token to Jenkins
+![Alt text](./images/final-lab-jenkins-add-token.png)
+
+After that, add variables on gitlab
+![Alt text](./images/final-lab-gitlab-add-variables.png)
+
+Create a pull images secret for dev namespace and backup prod namespace on local
+```text
+kubectl get secret -n app-dev
+NAME                    TYPE                             DATA   AGE
+nexus-registry-secret   kubernetes.io/dockerconfigjson   1      23d
+
+kubectl get secret -n prod-dr
+NAME                    TYPE                             DATA   AGE
+nexus-registry-secret   kubernetes.io/dockerconfigjson   1      33s
 ```
 
 You need to install ArgoCD CLI, please check guide here: https://github.com/trongkido/devops-coaching/tree/main/aws/create-eks-cluster/running-argocd-on-eks-cluster
 
-Then, you need to create a account token, before, you need to create an ArgoCD account for this project and grant least privilege for this account, please follow this guide:
- 
+Then, you need to create a account token, before, you need to create an ArgoCD account for this project and grant least privilege for this account, please follow this guide: https://github.com/trongkido/devops-coaching/blob/main/argocd/argocd-rbac/README.md
 
+After that, you need to create gitlab runner, please refer here: https://github.com/trongkido/devops-coaching/blob/main/git-cicd/hands-on-cicd-lab/README.md
 
+Then, create a gitlab CD pipeline
+```text
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: always
+    - when: never
 
+stages:
+  - deploy-local
+  - local-test
+  - cto-approval
+  - deploy-cloud
 
+push-to-local-argo:deploy-local:
+  stage: deploy-local
+  image:
+    name: quay.io/argoproj/argocd:v2.11.3
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - export LOCAL_ARGOCD_CONNECTION_STRING="--auth-token $LOCAL_ARGOCD_TOKEN --server $LOCAL_ARGOCD_SERVER --insecure --grpc-web"
+  script:
+    - |
+        echo "🔐 Logging in to Local Argo CD and searching for application $LOCAL_APP_NAME"
+        APP=$(argocd app list $LOCAL_ARGOCD_CONNECTION_STRING | awk '{print $1}' | grep -w "$LOCAL_APP_NAME" || true)
+        echo "$APP"
+        if [ -z "$APP" ]; then
+          echo "No applications found, create new."
+          argocd app create $LOCAL_APP_NAME $LOCAL_ARGOCD_CONNECTION_STRING \
+            --project $LOCAL_PROJECT \
+            --repo $LOCAL_HELM_REPO \
+            --helm-chart $HELM_CHART \
+            --revision $HELM_VERSION \
+            --dest-server $LOCAL_K8S_CLUSTER \
+            --dest-namespace $APP_NAMESPACE \
+            --values $VALUE_FILE \
+            --sync-policy automated \
+            --self-heal \
+            --sync-option CreateNamespace=true \
+            --sync-option PruneLast=true \
+            --upsert
+        else
+           echo "Force sync for the following applications:"
+           echo "$APP"
+           argocd app sync $LOCAL_ARGOCD_CONNECTION_STRING "$APP"
+           echo "Sync finish"
+        fi
+
+local-test:
+  stage: local-test
+  variables:
+    GIT_STRATEGY: none
+  allow_failure: false
+  script:
+    - |
+        echo "Testing for vulnerability"
+        # Your test command here
+        echo "Testing for business logic"
+        # Your test command here
+  needs:
+    - job: push-to-argo:deploy-local
+
+approval:confirm-deploy:
+  stage: cto-approval
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo "Waiting for CTO approval before pushing Docker images and deploy to cloud production..."
+  when: manual
+  only:
+    - main
+  environment:
+    name: cloud-production
+    url: https://$CLOUD_ARGOCD_SERVER
+  needs:
+    - job: local-test
+
+# Push image to cloud registry
+push-image-cloud:deploy-cloud:
+  stage: deploy-cloud
+  variables:
+    GIT_STRATEGY: none
+  allow_failure: false
+  script:
+    - |
+        echo "Login to $GCLOUD_REGISTRY"
+        docker login $GCLOUD_REGISTRY -u _json_key --password-stdin < "$GCLOUD_CREDENTIALS"
+        echo "Login to $GCLOUD_REGISTRY successfully!"
+        docker tag $LOCAL_APP_REPO/${LOCAL_APP_NAME}:${IMAGE_TAG} $GCLOUD_REGISTRY/$GCLOUD_REPO/$LOCAL_APP_NAME:$IMAGE_TAG
+        docker push $GCLOUD_REGISTRY/$GCLOUD_REPO/$LOCAL_APP_NAME:$IMAGE_TAG
+        echo "Logout from $GCLOUD_REGISTRY"
+        docker logout $GCLOUD_REGISTRY
+  needs:
+    - job: approval:confirm-deploy
+
+# Update github value file
+update-github:deploy-cloud:
+  stage: deploy-cloud
+  image:
+    name: alpine:3.19
+  variables:
+    GIT_STRATEGY: none
+  allow_failure: false
+  before_script:
+    # Install dependencies
+    - apk add --no-cache git curl bash
+    # Install yq (mikefarah)
+    - curl -s -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
+    - chmod +x /usr/local/bin/yq
+    # Configure git
+    - git config --global user.email "gitlab-ci@gmail.com"
+    - git config --global user.name "Gitlab CI/CD Automation"
+    - export GITHUB_BRANCH="main"
+  script:
+    - |
+      echo "Fetch github repo"
+      git clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/trongkido/${LOCAL_APP_NAME}.git
+      echo "Update values.yaml file"
+      cd ${LOCAL_APP_NAME}
+      cp helm/app-template/values.yaml helm/app-template/values-prod.yaml
+      yq e -i '
+        .imagePullSecrets = "" |
+        .image.repository = strenv(GCLOUD_REGISTRY) + "/" + strenv(GCLOUD_REPO) + "/" + strenv(LOCAL_APP_NAME) |
+        .image.tag = strenv(IMAGE_TAG) |
+        .ingress.hosts[0].host = strenv(CLOUD_APP_HOST) |
+        .ingress.certmanager = {
+          "enabled": true,
+          "issuename": "letsencrypt-prod",
+          "issueacme": "https://acme-v02.api.letsencrypt.org/directory"
+        } |
+        .ingress.tls = [
+          {
+            "hosts": [strenv(CLOUD_APP_HOST)],
+            "secretName": strenv(CLOUD_APP_TLS)
+          }
+        ]
+      ' helm/app-template/values-prod.yaml
+      echo "Update file values-prod.yaml to github repo"
+      git add helm/app-template/values-prod.yaml
+      git commit -m "chore(cd): update image tag and ingress config"
+      git push origin ${GITHUB_BRANCH}
+  needs:
+    - job: push-image-cloud:deploy-cloud
+
+# Deploy to gke
+push-to-cloud-argo:deploy-cloud:
+  stage: deploy-cloud
+  image:
+    name: quay.io/argoproj/argocd:v2.11.3
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - export CLOUD_ARGOCD_CONNECTION_STRING="--auth-token $CLOUD_ARGOCD_TOKEN --server $CLOUD_ARGOCD_SERVER --insecure --grpc-web"
+  script:
+    - |
+        echo "🔐 Logging in to Cloud ArgoCD and searching for application $APP_NAME"
+        APP=$(argocd app list $CLOUD_ARGOCD_CONNECTION_STRING | awk '{print $1}' | grep -w "$APP_NAME" || true)
+        echo "$CLOUD_APP"
+        if [ -z "$CLOUD_APP" ]; then
+          echo "No applications found, create new."
+          echo "$APP_NAME"
+          argocd app create $APP_NAME $CLOUD_ARGOCD_CONNECTION_STRING \
+            --project $CLOUD_PROJECT \
+            --repo $GITHUB_REPO \
+            --path $HELM_PATH \
+            --revision $GITHUB_BRANCH \
+            --dest-server $CLOUD_K8S_CLUSTER \
+            --dest-namespace $CLOUD_APP_NAMESPACE \
+            --values $CLOUD_VALUE_FILE \
+            --sync-policy automated \
+            --self-heal \
+            --sync-option CreateNamespace=true \
+            --sync-option PruneLast=true \
+            --upsert
+        else
+           echo "Force sync for the following applications:"
+           echo "$CLOUD_APP"
+           argocd app sync $CLOUD_ARGOCD_CONNECTION_STRING "$CLOUD_APP"
+           echo "Sync finish"
+        fi
+  needs:
+    - job: update-github:deploy-cloud
+```
+
+Run pipeline
+Jenkins
+[Alt text](./images/final-lab-jenkins-pipeline.png)
+
+Gitlab
+[Alt text](./images/final-lab-gitlab-pipeline.png)
+
+Update record on CloudFlare
+[Alt text](./images/final-lab-cloudflare-update-record.png)
+
+Check access from internet
+App on GKE
+[Alt text](./images/final-lab-app-access-on-gke.png)
+
+App on local
+[Alt text](./images/final-lab-app-access-on-local.png)
+
+### Disaster Recovery Scenario (DR Test)
+1. Access main website: `gke-easy-rbac.trongnv.xyz` (running on GKE).
+2. Simulate failure: Shut down EKS (or scale nodes to 0).
+3. Failover:
+   - Update **Cloudflare DNS** to point traffic to **DR Tunnel** (easy-rbac.trongnv.xyz)
+4. Result:
+   - Website remains available (served from Local On-Premise).
