@@ -230,5 +230,11 @@ pipeline {
 
 ```
 
+You need to install ArgoCD CLI, please check guide here: https://github.com/trongkido/devops-coaching/tree/main/aws/create-eks-cluster/running-argocd-on-eks-cluster
+
+Then, you need to create a account token, before, you need to create an ArgoCD account for this project and grant least privilege for this account, please follow this guide:
+ 
+
+
 
 
