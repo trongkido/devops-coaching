@@ -486,6 +486,9 @@ Jenkins
 Gitlab
 ![Alt text](./images/final-lab-gitlab-pipeline.png)
 
+Docker image on Google Artifact Registry
+![Alt text](./images/final-lab-images-on-gar.png)
+
 Update record on CloudFlare
 ![Alt text](./images/final-lab-cloudflare-update-record.png)
 
