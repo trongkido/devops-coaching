@@ -248,6 +248,17 @@ pipeline {
                   --form variables[LOCAL_K8S_CLUSTER]="https://kubernetes.default.svc" \
                   --form variables[APP_NAMESPACE]="K8S_NAMESPACE" \
                   --form variables[VALUE_FILE]="values.yaml" \
+                  --form variables[LOCAL_APP_REPO]="$REGISTRY_HOST/$APP_NAME" \
+                  --form variables[IMAGE_TAG]="$APP_IMAGE_TAG" \
+                  --form variables[CLOUD_APP_HOST]="gke-$APP_HOST" \
+                  --form variables[CLOUD_APP_TLS]="web-tls-auto" \
+                  --form variables[CLOUD_PROJECT]="prod" \
+                  --form variables[GITHUB_REPO]="https://github.com/trongkido/easy-rbac.git" \
+                  --form variables[HELM_PATH]="helm/app-template" \
+                  --form variables[GITHUB_BRANCH]="main" \
+                  --form variables[CLOUD_K8S_CLUSTER]="https://kubernetes.default.svc" \
+                  --form variables[CLOUD_APP_NAMESPACE]="prod-app" \
+                  --form variables[CLOUD_VALUE_FILE]="values-prod.yaml"
                   $LOCAL_GITLAB_URL/api/v4/projects/$LOCAL_GITLAB_PROJECT_ID/trigger/pipeline
              '''
       }
@@ -470,20 +481,20 @@ push-to-cloud-argo:deploy-cloud:
 
 Run pipeline
 Jenkins
-[Alt text](./images/final-lab-jenkins-pipeline.png)
+![Alt text](./images/final-lab-jenkins-pipeline.png)
 
 Gitlab
-[Alt text](./images/final-lab-gitlab-pipeline.png)
+![Alt text](./images/final-lab-gitlab-pipeline.png)
 
 Update record on CloudFlare
-[Alt text](./images/final-lab-cloudflare-update-record.png)
+![Alt text](./images/final-lab-cloudflare-update-record.png)
 
 Check access from internet
 App on GKE
-[Alt text](./images/final-lab-app-access-on-gke.png)
+![Alt text](./images/final-lab-app-access-on-gke.png)
 
 App on local
-[Alt text](./images/final-lab-app-access-on-local.png)
+![Alt text](./images/final-lab-app-access-on-local.png)
 
 ### Disaster Recovery Scenario (DR Test)
 1. Access main website: `gke-easy-rbac.trongnv.xyz` (running on GKE).
