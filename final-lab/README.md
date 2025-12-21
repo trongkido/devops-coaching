@@ -489,6 +489,12 @@ Gitlab
 Update record on CloudFlare
 ![Alt text](./images/final-lab-cloudflare-update-record.png)
 
+App on local ArgoCD
+![Alt text](./images/final-lab-app-on-local.png)
+
+App on GKE ArgoCD
+![Alt text](./images/final-lab-app-on-gke.png)
+
 Check access from internet
 App on GKE
 ![Alt text](./images/final-lab-app-access-on-gke.png)
