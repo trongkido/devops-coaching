@@ -106,3 +106,19 @@ resource "aws_instance" "web_server" {
     Name = "Tony-Web-01"
   }
 }
+```
+With just these few lines, you replace dozens of manual clicks on the Console.
+
+### 7. When should & should NOT use it?
+✅ SHOULD USE WHEN:
+
+Production systems that require stability.
+Teamwork, need code reviews.
+Complex systems, multi-platform (Hybrid Cloud).
+Need consistent environments (Dev = Staging = Prod).
+
+🚫 SHOULD NOT USE WHEN:
+
+Quick experiments (POC) used once and discarded.
+Deep OS internal configuration management (Create users, config files) → Use Ansible instead!
+Very small systems, just 1 server that never changes.
