@@ -100,7 +100,7 @@ Compare the output. The additional entry in the second output is the name of the
 
 3\. After navigating to the required IP address, you may see a warning message that the page is unsafe because Proxmox VE uses self-signed [SSL certificates](https://phoenixnap.com/kb/types-of-ssl-certificates). Click the IP link to proceed to the Proxmox web management interface.
 
-![Accept proxmox certificate and proceed.](https://phoenixnap.com/kb/ddwp-content/uploads/2022/01/accept-proxmox-certificate-and-proceed.png)
+![Accept proxmox certificate and proceed.](https://phoenixnap.com/kb/wp-content/uploads/2022/01/accept-proxmox-certificate-and-proceed.png)
 
 4\. To access the interface, [log in as root](https://phoenixnap.com/glossary/what-is-root-access) and provide the password you set when installing Proxmox.
 
@@ -302,7 +302,6 @@ Wait for the installation to complete.
 ```bash
 ss -tunelp | grep 8006
 ```
-
 
 ![Confirm Proxmox is listening on port 8006.](https://phoenixnap.com/kb/wp-content/uploads/2024/05/check-proxmox-installation.png)
 
