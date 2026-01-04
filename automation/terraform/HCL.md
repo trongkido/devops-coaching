@@ -2,7 +2,7 @@
 
 ## HCL Core: Anatomy of the 7 Pillars of Terraform
 
-Welcome back to **Tony Tech Lab**. Based on official documentation and hands-on experience, this article accurately summarizes the **7 core components of HCL (HashiCorp Configuration Language)** to help you master **Infrastructure as Code (IaC)**.
+Based on official documentation and hands-on experience, this article accurately summarizes the **7 core components of HCL (HashiCorp Configuration Language)** to help you master **Infrastructure as Code (IaC)**.
 
 ---
 
