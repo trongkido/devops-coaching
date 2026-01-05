@@ -166,6 +166,19 @@ Select the server you are running and click on **local (pve1)**. Select **ISO Im
 
 **Note:** Learn how to [delete a VM in Proxmox](https://phoenixnap.com/kb/proxmox-delete-vm). The guide includes both the command line and GUI methods for deleting VM, VM disks, and VM snapshots.
 
+## Converting a Promox VE VM into a template in Proxmox VE web console
+Now that your VM is prepped, let’s convert it into a template using the Proxmox VE web console. Here’s a step-by-step guide:
+Locate Your VM: In the left-hand pane, navigate to the “Datacenter” where your VM resides. Expand the datacenter and locate the VM you want to convert.
+
+Right-Click and Convert: Right-click on the chosen VM. From the context menu, select the option “Convert to template.” Here we are converting the VM (104 Win7). The below screenshot shows this step.
+![Alt text](./images/proxmox-create-template1.png)
+
+Confirmation : In all your Proxmox VE version, you might encounter a confirmation dialog. Click “Yes” to proceed. The below screenshot shows this step.
+![Alt text](./images/proxmox-create-template2.png)
+
+Conversion Process: Proxmox VE will initiate the conversion process. The VM will remain shutdown during this time. The progress might be indicated visually or through console logs (accessible by clicking the VM and then “Console”) or by clicking the description “Convert to template” under description in Tasks bar available at the bottom.
+![Alt text](./images/proxmox-create-template3.png)
+
 ## Install Proxmox Virtual Environment via Command Line
 ----------------------------------------------------
 
