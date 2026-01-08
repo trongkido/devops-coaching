@@ -202,6 +202,10 @@ Datacenter > Permissions > Add > Group Permissions
 - Add permissons to Groups
 ![Alt text](./images/proxmox-create-api-token5.png)
 
+- Add permission to API Token
+Datacenter > Permissions > Add > API Token Permissions
+![Alt text](./images/proxmox-create-api-token6.png)
+
 ## Install Proxmox Virtual Environment via Command Line
 ----------------------------------------------------
 
