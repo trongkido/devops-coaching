@@ -179,6 +179,29 @@ Confirmation : In all your Proxmox VE version, you might encounter a confirmatio
 Conversion Process: Proxmox VE will initiate the conversion process. The VM will remain shutdown during this time. The progress might be indicated visually or through console logs (accessible by clicking the VM and then “Console”) or by clicking the description “Convert to template” under description in Tasks bar available at the bottom.
 ![Alt text](./images/proxmox-create-template3.png)
 
+## Create an **API Token** and assign permissions
+To create an user and assign api token for a user, please following these steps
+- Create a group
+Datacenter > Permission > Group > Create
+![Alt text](./images/proxmox-create-api-token1.png)
+
+- Next, create user and add user to group
+Datacenter > Permission > User > Add
+![Alt text](./images/proxmox-create-api-token2.png)
+
+- Then, Create API Token for user
+Datacenter > Permissions > API Tokens > Add
+![Alt text](./images/proxmox-create-api-token3.png)
+>[!NOTE]
+>Please save this api token because it only shows once
+
+- After that, Grant permission for group
+Datacenter > Permissions > Add > Group Permissions
+![Alt text](./images/proxmox-create-api-token4.png)
+
+- Add permissons to Groups
+![Alt text](./images/proxmox-create-api-token5.png)
+
 ## Install Proxmox Virtual Environment via Command Line
 ----------------------------------------------------
 
@@ -404,7 +427,6 @@ For instance, to add 10G to a **virtio0** disk on a VM with the ID 100, run:
 qm resize 100 virtio0 +10G
 ```
 
-
 ### Enable NAT Networking Mode
 
 As mentioned above, it is a good idea to change the default bridge networking mode to prevent the Proxmox host and VMs from being on the same network. To create a separate network, enable NAT networking mode. Follow the steps below:
@@ -414,7 +436,6 @@ As mentioned above, it is a good idea to change the default bridge networking mo
 ```
 sudo nano /etc/network/interfaces
 ```
-
 
 The file shows that **`vmbr0`** is the default bridge public network for Proxmox, as in the example below:
 
