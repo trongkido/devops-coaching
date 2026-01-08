@@ -1,4 +1,4 @@
-## Part 2: Auto Deploy VM on AWS EC2
+## Auto Deploy VM on AWS EC2
 
 We will create an EC2 instance in the Korean region (`ap-northeast-2`).
 
