@@ -118,3 +118,6 @@ To delete all the resources
   # Best practice: Protect production workspaces with state locking, required approvals, or separate configurations to prevent accidental destruction.
 terraform destroy
 ```
+
+After completion, the EC2 instance will be terminated.
+![Alt text](./images/ec2-terraform-destroy.png)
