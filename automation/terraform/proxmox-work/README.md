@@ -98,10 +98,10 @@ terraform apply --auto-approve
 ```
 
 Terraform run result
-![Alt text](./images/proxmox-terraform-aplly1.png)
+![Alt text](./images/proxmox-terraform-apply1.png)
 
 VM on Proxmox
-![Alt text](./images/proxmox-terraform-aplly2.png)
+![Alt text](./images/proxmox-terraform-apply2.png)
 
 To delete the resource
 ```bash
