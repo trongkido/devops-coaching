@@ -201,7 +201,7 @@ terraform apply
 Type `yes`.
 
 After a few minutes:
-- AWS Console → VPC `tonytechlab-vpc`
+- AWS Console → VPC
 - Proxmox UI → VM `student-vm-01` running
 
 ---
