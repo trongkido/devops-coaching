@@ -122,3 +122,132 @@ Need consistent environments (Dev = Staging = Prod).
 Quick experiments (POC) used once and discarded.
 Deep OS internal configuration management (Create users, config files) → Use Ansible instead!
 Very small systems, just 1 server that never changes.
+
+### 8. Install terraform
+Terraform is distributed as a single binary executable.
+The recommended way is to use official package managers when available, or download the binary manually from the official HashiCorp releases page.
+Current latest stable version (as of early 2026): 1.14.3
+Always check the official site for the newest version: https://developer.hashicorp.com/terraform/install
+After installation, verify with:
+```bash
+terraform -version
+# or
+terraform version
+```
+
+#### On Windows
+##### Method 1: Manual Installation (Recommended for latest version)
+1. Go to → https://releases.hashicorp.com/terraform/
+2. Find the latest version (e.g., 1.14.3) → Download the Windows zip file (e.g: terraform_1.14.3_windows_amd64.zip)
+3. Extract the zip file → You will get a single file: terraform.exe
+4. Create a new folder, e.g., C:\terraform
+5. Move terraform.exe into this folder
+6. Add the folder to your system PATH:
+  - Right-click This PC → Properties → Advanced system settings → Environment Variables
+  - Under System variables, find and edit Path
+  - Add new entry: C:\terraform (or wherever you placed it)
+  - Click OK on all windows
+7. Open a new Command Prompt or PowerShell and verify:
+```bash
+terraform -version
+```
+
+##### Method 2: Using Chocolatey (Package Manager)
+If you already have Chocolatey installed:
+```bash
+# Run in PowerShell (Administrator)
+choco install terraform
+# or to upgrade:
+choco upgrade terraform
+```
+
+#### On MacOS
+Recommended Method: Homebrew (Official HashiCorp tap)
+1. Make sure you have Homebrew installed (brew --version)
+  - If not: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+2. Add the official HashiCorp tap and install:
+```bash
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+```
+
+3. (Optional) To upgrade later:
+```bash
+brew upgrade hashicorp/tap/terraform
+```
+
+Alternative: Manual Binary Installation
+1. Go to → https://releases.hashicorp.com/terraform/
+2. Download the file for your architecture:
+  - Apple Silicon (M1/M2/M3...): terraform_1.14.3_darwin_arm64.zip
+  - Intel: terraform_1.14.3_darwin_amd64.zip
+
+3. Unzip the file
+4. Move the binary to a directory in your PATH:
+```bash
+unzip terraform_*.zip
+chmod +x terraform
+sudo mv terraform /usr/local/bin/
+```
+
+4. Verify
+```bash
+terraform version
+```
+
+#### On Linux
+Recommended: Official HashiCorp APT/YUM Repository (Debian/Ubuntu or RHEL/Fedora)
+For Ubuntu / Debian
+```bash
+# Install prerequisites
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
+
+# Add HashiCorp GPG key
+wget -O- https://apt.releases.hashicorp.com/gpg | \
+  gpg --dearmor | \
+  sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+# Add the official repository
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+  sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+# Update and install
+sudo apt update
+sudo apt install terraform
+```
+
+For RHEL / CentOS / Fedora / Amazon Linux
+```bash
+# RHEL / CentOS
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+sudo yum -y install terraform
+
+# Fedora
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+sudo dnf -y install terraform
+```
+
+Manual Binary Installation (Any Linux distro)
+1. Go to → https://releases.hashicorp.com/terraform/
+
+2. Choose correct architecture (most common: amd64 or arm64). Example: terraform_1.14.3_linux_amd64.zip
+
+3. Download and install:
+```bash
+wget https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip
+unzip terraform_1.14.3_linux_amd64.zip
+chmod +x terraform
+sudo mv terraform /usr/local/bin/
+```
+4. Verify
+```bash
+terraform -version
+```
+
+**Quick Tips**
+  - Always prefer official repositories or manual download for the very latest version.
+  - Use tools like tfenv or asdf if you need multiple Terraform versions on the same machine.
+  - After installation, run terraform -version in a new terminal window to confirm success.
