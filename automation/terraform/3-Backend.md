@@ -1,4 +1,4 @@
-# Terraform Backend - Complete Guide & Best Practices (2025–2026)
+# Terraform Backend - Complete Guide & Best Practices
 
 The **Terraform backend** defines **where** and **how** Terraform stores its **state file** (`terraform.tfstate`).
 
