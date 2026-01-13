@@ -25,10 +25,10 @@ Choosing and configuring the right backend is one of the **most important decisi
 | CI/CD safety                   | Very dangerous           | Safe                          |
 | Versioning of state            | Manual                   | Usually automatic             |
 
-**Golden Rule 2025–2026**:  
+**Golden Rule**:  
 **Never** use the `local` backend in any project that has more than 1 person or runs in CI/CD.
 
-## 3. Most Popular & Recommended Backends (2025–2026)
+## 3. Most Popular & Recommended Backends
 
 | Rank | Backend              | Locking | Encryption | Versioning | Best For                              | Difficulty |
 |------|----------------------|---------|------------|------------|---------------------------------------|------------|
@@ -42,7 +42,7 @@ Choosing and configuring the right backend is one of the **most important decisi
 
 ## 4. Recommended Production Configuration Examples
 
-### AWS – S3 + DynamoDB (still #1 choice in 2026)
+### AWS – S3 + DynamoDB
 
 ```hcl
 terraform {
