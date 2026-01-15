@@ -1,23 +1,3 @@
-# Data Source
-
-## Write Terraform Code
-
-Create these files:
-
-provider.tf
-```hcl
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 3.27"
-    }
-  }
-}
-```
-
-main.tf
-```hcl
 provider "aws" {
   profile = "trong-aws"
   region  = "ap-northeast-2"
@@ -58,28 +38,3 @@ data "aws_subnets" "all" {
     alb_subnet = "public"
   }
 }
-```
-
-outputs.tf
-```hcl
-# Outputs the list of subnet IDs
-output "all" {
-  value = {
-    public_subnets = data.aws_subnets.all.ids
-  }
-}
-```
-
-## Deploy
-
-Run these command
-```bash
-terraform init
-terraform fmt
-terraform plan
-terraform apply --auto-approve
-```
-
-Terraform run result
-
-![Alt text](./images/data-source-terraform-apply.png)
