@@ -77,7 +77,245 @@ variable "cidr" {
 }
 ```
 
-## 3. Variable Assignment – Precedence Order (Highest → Lowest)
+## 3. 🔐 Sensitive Variables in Terraform
+
+### What Is a Sensitive Variable?
+A sensitive variable tells Terraform:
+
+> “⚠️ Do NOT display this value in logs, plans, or outputs.”
+
+Example:
+```hcl
+variable "db_password" {
+  description = "Database password"
+  type        = string
+  sensitive   = true
+}
+```
+
+Terraform actions:
+- Terraform masks the value
+- Shows <sensitive> instead of real content
+
+### What Sensitive Variables Actually Protect
+
+✅ Protected
+
+| Location           | Behavior |
+| ------------------ | -------- |
+| `terraform plan`   | Masked   |
+| `terraform apply`  | Masked   |
+| `terraform output` | Masked   |
+| CLI logs           | Masked   |
+
+
+❌ NOT Protected
+
+| Location                       | Reality                 |
+| ------------------------------ | ----------------------- |
+| `terraform.tfstate`            | **Stored in plaintext** |
+| Remote backend (S3, GCS, etc.) | **Stored in plaintext** |
+| Provider API calls             | Sent in clear text      |
+| Memory / runtime               | Visible to Terraform    |
+
+### Using Sensitive Variables Correctly
+
+Variable definition
+```hcl
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+```
+
+Usage
+```hcl
+resource "aws_db_instance" "db" {
+  password = var.db_password
+}
+```
+
+Terraform output:
+```hcl
+password = <sensitive>
+```
+
+### Sensitive Outputs
+
+You must explicitly mark outputs as sensitive. Otherwise Terraform will error.
+```hcl
+output "db_password" {
+  value     = var.db_password
+  sensitive = true
+}
+```
+
+### Sensitive Variables + tfvars (⚠️ Careful)
+
+❌ Bad (Never commit)
+```hcl
+# terraform.tfvars
+db_password = "SuperSecret123!"
+```
+
+✅ BEST PRACTICE: Environment Variables
+Terraform automatically loads:
+```bash
+export TF_VAR_db_password="SuperSecret123!"
+```
+
+**Advantages:**
+- Not written to disk
+- Works in CI/CD
+- Secure secret injection
+
+### BEST PRACTICE: Secrets Manager (Production)
+
+**AWS Secrets Manager**
+```hcl
+data "aws_secretsmanager_secret_version" "db" {
+  secret_id = "prod/db/password"
+}
+
+resource "aws_db_instance" "db" {
+  password = data.aws_secretsmanager_secret_version.db.secret_string
+}
+```
+
+**Benefits:**
+- Rotation
+- Audit logs
+- IAM-controlled access
+
+### Remote Backend Security (VERY IMPORTANT)
+
+Because secrets live in state files, your backend must be secure.
+
+***AWS S3 Backend (Recommended)***
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "terraform-state-prod"
+    key            = "network/terraform.tfstate"
+    region         = "ap-southeast-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
+}
+```
+
+✔ Encryption at rest
+✔ IAM access control
+✔ State locking
+
+### Lifecycle Ignore Changes (Advanced)
+
+If secrets rotate externally:
+
+```hcl
+resource "aws_db_instance" "db" {
+  password = var.db_password
+
+  lifecycle {
+    ignore_changes = [password]
+  }
+}
+```
+
+Prevents forced replacement.
+
+### 🔥 Common Mistakes
+
+❌ Thinking sensitive = true encrypts data
+❌ Committing tfvars with secrets
+❌ Printing secrets via terraform console
+❌ Using output without sensitive = true
+
+### 🧠 Decision Matrix
+
+| Use Case      | Best Solution                |
+| ------------- | ---------------------------- |
+| Local testing | Sensitive variable + env var |
+| CI/CD         | Env vars / secret injection  |
+| Production    | Secrets Manager / Vault      |
+| Compliance    | Encrypted backend + IAM      |
+| Audit         | Avoid outputs entirely       |
+
+## 4. Variable Files – Quick Reference
+
+| File pattern              | Auto-loaded? | Format      | Typical usage                          |
+|---------------------------|--------------|-------------|----------------------------------------|
+| `terraform.tfvars`        | Yes          | HCL         | Default / common values                |
+| `*.auto.tfvars`           | Yes          | HCL         | Environment-specific auto-loading      |
+| `*.auto.tfvars.json`      | Yes          | JSON        | CI/CD generated values                 |
+| `prod.tfvars`             | No           | HCL         | `terraform apply -var-file=prod.tfvars`|
+| Custom `.tfvars`          | No           | HCL         | Explicit loading                       |
+
+### terraform.tfvars
+
+#### What it is
+- A special, fixed filename
+- Automatically loaded by Terraform
+- Only **one** file with this exact name is supported
+
+#### Example
+```hcl
+project_name   = "devops-lab"
+environment    = "dev"
+instance_count = 2
+```
+
+#### Behavior
+- Loaded automatically if present
+- No ordering concerns
+- Cannot have multiple variants
+
+#### When to use
+- Single-environment projects
+- Labs and demos
+- Local-only testing
+- Simple setups
+
+#### Limitations
+- Only one file allowed
+- Not suitable for multi-environment workflows
+- Easy to overwrite by mistake
+
+### *.auto.tfvars
+
+#### What it is
+- Any file ending with `.auto.tfvars`
+- Terraform automatically loads **all** of them
+- Loaded in **alphabetical order**
+
+#### Examples
+```text
+dev.auto.tfvars
+prod.auto.tfvars
+region-ap.auto.tfvars
+secrets.auto.tfvars
+```
+
+#### Load Order (Important)
+```text
+01-base.auto.tfvars
+02-env.auto.tfvars
+99-secrets.auto.tfvars
+```
+
+Later files override earlier ones.
+
+#### When to use
+- Multi-environment infrastructure
+- CI/CD pipelines
+- Layered configuration
+- Team-based Terraform projects
+
+#### Risks
+- Harder to debug if naming is unclear
+- Overrides can be accidental if not documented
+
+## 5. Variable Assignment – Precedence Order (Highest → Lowest)
 
 This is **the most important table** to understand bugs:
 
@@ -91,19 +329,21 @@ This is **the most important table** to understand bugs:
 | 6      | Environment variables `TF_VAR_<name>`  | `export TF_VAR_region=eu-west-1`                                                |
 | 7      | Default value in `variable` block      | Lowest priority                                                                 |
 
-**Tip 2026**: Command-line overrides almost always win → very useful in CI/CD pipelines.
+**Tip**: Command-line overrides almost always win → very useful in CI/CD pipelines.
 
-## 4. Variable Files – Quick Reference
+## 6. Real-World Project Structure
 
-| File pattern              | Auto-loaded? | Format      | Typical usage                          |
-|---------------------------|--------------|-------------|----------------------------------------|
-| `terraform.tfvars`        | Yes          | HCL         | Default / common values                |
-| `*.auto.tfvars`           | Yes          | HCL         | Environment-specific auto-loading      |
-| `*.auto.tfvars.json`      | Yes          | JSON        | CI/CD generated values                 |
-| `prod.tfvars`             | No           | HCL         | `terraform apply -var-file=prod.tfvars`|
-| Custom `.tfvars`          | No           | HCL         | Explicit loading                       |
+```text
+terraform/
+├── main.tf
+├── variables.tf
+├── terraform.tfvars        # Local default
+├── dev.auto.tfvars         # Dev environment
+├── prod.auto.tfvars        # Prod environment
+├── secrets.auto.tfvars     # Sensitive values (gitignored)
+```
 
-## 5. Best Practices & Pro Tips
+## 7. Best Practices & Pro Tips
 
 1. **Always** add `description` — needed for documentation & terraform-docs
 2. **Always** add `type` — prevents type coercion bugs
@@ -143,7 +383,7 @@ This is **the most important table** to understand bugs:
 14. Document complex variables in README.md or with `terraform-docs`
 15. In modules: mirror provider/resource argument names when possible
 
-## 6. Common Patterns
+## 8. Common Patterns
 
 **Environment-specific files**
 
@@ -182,7 +422,7 @@ locals {
 }
 ```
 
-## 7. Quick Troubleshooting Checklist
+## 9. Quick Troubleshooting Checklist
 
 - Value not applied? → Check precedence order
 - "Variable not used" warning? → You declared but didn't use `var.xxx`
