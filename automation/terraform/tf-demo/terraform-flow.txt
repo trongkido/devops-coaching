@@ -1,0 +1,5 @@
+terraform fmt
+terraform validate
+terraform plan
+terraform test
+terraform apply
