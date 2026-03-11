@@ -1,6 +1,10 @@
+variables {
+  enable_provisioner = false
+}
+
 run "ec2_test" {
 
-  command = plan
+  command = apply
 
   assert {
     condition     = module.ec2_instance.instance_id != ""
